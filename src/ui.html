@@ -1,32 +1,65 @@
 <!doctype html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8" />
     <title>DesignOps Assistant</title>
     <style>
-      body { font: 12px/1.4 ui-sans-serif, system-ui; margin: 12px; }
-      .bar { display: grid; grid-template-columns: repeat(6,auto) 1fr; gap: 8px; align-items: center; }
-      .bar button { padding: 6px 10px; }
-      textarea { width: 100%; height: 220px; font-family: ui-monospace, monospace; }
-      .status { color:#666; text-align:right; }
+        body { font: 12px/1.4 ui-sans-serif, system-ui; margin: 12px; }
+        .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+        .bar input[type="number"]{ width:72px; }
+        textarea { width: 100%; height: 220px; font-family: ui-monospace, monospace; }
+        .status { color:#666; text-align:right; }
+        #tree { font-family: ui-monospace, monospace; font-size:11px; line-height:1.35; max-height:280px; overflow:auto; border:1px solid #e5e5e5; padding:8px; border-radius:6px; }
+        details > summary { cursor:pointer; }
+        .muted{ color:#777 }
+        .pill{ background:#f3f3f3; border-radius:999px; padding:0 6px; margin-left:4px; }
     </style>
-  </head>
-  <body>
-    <div class="bar">
-      <button id="syncTokens">Sync Tokens</button>
-      <button id="genScreens">Generate Screens</button>
-      <button id="updateScreens">Update Screens</button>
-      <button id="exportVars">Export Variables</button>
-      <button id="exportSelection">Export Selection</button>
-      <button id="exportDoc">Export Document</button>
-      <span class="status" id="status">Ready</span>
-    </div>
+</head>
+<body>
+<div class="grid">
+    <section>
+        <div class="bar">
+            <button id="exportSelection">Export Selection</button>
+            <button id="exportDoc">Export Document</button>
+            <span class="status" id="status">Ready</span>
+        </div>
 
-    <details open>
-      <summary>Output</summary>
-      <textarea id="out" spellcheck="false"></textarea>
-    </details>
 
-    <script src="./ui.js"></script>
-  </body>
+        <details open>
+            <summary>Raw JSON</summary>
+            <textarea id="out" spellcheck="false"></textarea>
+        </details>
+    </section>
+
+
+    <section>
+        <div class="bar">
+            <label>Padding <input id="pad" type="number" value="24"/></label>
+            <label>Item <input id="gap" type="number" value="12"/></label>
+            <select id="layout">
+                <option>VERTICAL</option>
+                <option>HORIZONTAL</option>
+            </select>
+            <button id="normalize">Normalize Spacing</button>
+        </div>
+
+
+        <div class="bar" style="margin-top:6px">
+            <input id="server" placeholder="http://localhost:3000" style="flex:1"/>
+            <input id="token" placeholder="Bearer token (optional)"/>
+            <button id="pullApply">Pull & Apply Rules</button>
+        </div>
+
+
+        <details open style="margin-top:8px">
+            <summary>Node Visualizer</summary>
+            <div id="tree">Click “Export Selection/Document” to render the tree.</div>
+        </details>
+    </section>
+</div>
+
+
+<script src="ui.js"></script>
+</body>
 </html>

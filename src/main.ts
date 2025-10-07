@@ -1,49 +1,61 @@
 import { exportVariablesJSON, exportSelectionJSON, exportDocumentJSON } from "./core/export";
+import { normalizeSpacingInSelection, applyRulesToPage, type Rule } from "./actions";
 
-figma.showUI(__html__, { width: 820, height: 520 });
+figma.showUI(__html__, { width: 980, height: 620 });
 
 figma.ui.onmessage = async (msg: any) => {
     try {
-        if (msg.type === "sync-tokens") {
-            // TODO: call your existing sync
-            figma.notify("✅ Tokens synced");
-            figma.ui.postMessage({ type: "notify", text: "Tokens synced" });
-            return;
-        }
+        switch (msg.type) {
+            case "sync-tokens":
+                figma.notify("✅ Tokens synced");
+                figma.ui.postMessage({ type: "notify", text: "Tokens synced" });
+                return;
 
-        if (msg.type === "generate-screens") {
-            // TODO: call your generate
-            figma.notify("🧱 Screens generated");
-            figma.ui.postMessage({ type: "notify", text: "Screens generated" });
-            return;
-        }
+            case "export-variables": {
+                const data = exportVariablesJSON();
+                figma.ui.postMessage({ type: "export-result", payload: data });
+                figma.notify("📤 Variables exported");
+                return;
+            }
 
-        if (msg.type === "update-screens") {
-            // TODO: call your update
-            figma.notify("♻️ Screens updated");
-            figma.ui.postMessage({ type: "notify", text: "Screens updated" });
-            return;
-        }
+            case "export-selection": {
+                const data = exportSelectionJSON({ onlyFrames: true, maxDepth: 4 });
+                figma.ui.postMessage({ type: "export-result", payload: data });
+                figma.notify("📤 Selection exported");
+                return;
+            }
 
-        if (msg.type === "export-variables") {
-            const data = exportVariablesJSON();
-            figma.ui.postMessage({ type: "export-result", payload: data });
-            figma.notify("📤 Variables exported");
-            return;
-        }
+            case "export-document": {
+                const data = exportDocumentJSON({ onlyFrames: true, maxDepth: 3, maxChildren: 500 });
+                figma.ui.postMessage({ type: "export-result", payload: data });
+                figma.notify("📤 Document exported");
+                return;
+            }
 
-        if (msg.type === "export-selection") {
-            const data = exportSelectionJSON({ onlyFrames: true, maxDepth: 3 });
-            figma.ui.postMessage({ type: "export-result", payload: data });
-            figma.notify("📤 Selection exported");
-            return;
-        }
+            case "normalize-spacing": {
+                normalizeSpacingInSelection(msg.padding ?? 24, msg.itemSpacing ?? 12, msg.layout ?? "VERTICAL");
+                return;
+            }
 
-        if (msg.type === "export-document") {
-            const data = exportDocumentJSON({ onlyFrames: true, maxDepth: 2, maxChildren: 300 });
-            figma.ui.postMessage({ type: "export-result", payload: data });
-            figma.notify("📤 Document exported");
-            return;
+            case "apply-rules": {
+                const rules: Rule[] = msg.rules || [];
+                applyRulesToPage(rules);
+                return;
+            }
+
+            case "fetch-and-apply-rules": {
+                const { serverUrl, token } = msg;
+                const res = await fetch(`${serverUrl.replace(/\/$/, "")}/rules`, {
+                    headers: { Authorization: token ? `Bearer ${token}` : "" },
+                });
+                if (!res.ok) throw new Error(`Failed to GET /rules (${res.status})`);
+                const rules: Rule[] = await res.json();
+                applyRulesToPage(rules);
+                return;
+            }
+
+            default:
+                return;
         }
     } catch (e: any) {
         figma.notify(`⚠️ ${e?.message || e}`);

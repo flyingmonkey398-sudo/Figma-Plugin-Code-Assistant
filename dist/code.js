@@ -166,42 +166,124 @@ function compact(o) {
   return out;
 }
 
+// src/actions.ts
+function normalizeSpacingInSelection(padding = 24, item = 12, layout = "VERTICAL") {
+  const nodes = figma.currentPage.selection.filter(
+    (n) => n.type === "FRAME" || n.type === "COMPONENT" || n.type === "INSTANCE"
+  );
+  if (!nodes.length) figma.notify("No frames selected \u2014 adjusting all visible frames on page");
+  const targets = nodes.length ? nodes : figma.currentPage.findAll((n) => "layoutMode" in n);
+  let changed = 0;
+  for (const node of targets) {
+    const f = node;
+    if (f.layoutMode === "NONE") f.layoutMode = layout;
+    if (typeof f.paddingTop === "number") {
+      f.paddingTop = padding;
+      f.paddingRight = padding;
+      f.paddingBottom = padding;
+      f.paddingLeft = padding;
+    }
+    if (typeof f.itemSpacing === "number") f.itemSpacing = item;
+    changed++;
+  }
+  figma.notify(`\u2705 Updated spacing on ${changed} node(s)`);
+}
+function applyRulesToPage(rules) {
+  const frames = figma.currentPage.findAll((n) => "layoutMode" in n);
+  let touched = 0;
+  for (const n of frames) {
+    for (const r of rules) {
+      if (!matches(n, r.match)) continue;
+      if (r.set) {
+        setProps(n, r.set);
+        touched++;
+      }
+    }
+  }
+  figma.notify(`\u2705 Applied ${rules.length} rule(s) to ${touched} node(s)`);
+}
+function matches(n, m) {
+  if (!m) return true;
+  if (m.type && n.type !== m.type) return false;
+  if (m.nameRegex) {
+    try {
+      if (!new RegExp(m.nameRegex).test(n.name)) return false;
+    } catch {
+      return false;
+    }
+  }
+  return true;
+}
+function setProps(n, s) {
+  const f = n;
+  if (s.layoutMode && "layoutMode" in f) f.layoutMode = s.layoutMode;
+  if (s.itemSpacing != null && "itemSpacing" in f) f.itemSpacing = s.itemSpacing;
+  if (s.padding && "paddingTop" in f) {
+    const p = s.padding;
+    if (p.top != null) f.paddingTop = p.top;
+    if (p.right != null) f.paddingRight = p.right;
+    if (p.bottom != null) f.paddingBottom = p.bottom;
+    if (p.left != null) f.paddingLeft = p.left;
+  }
+  if (s.sizing) {
+    if (s.sizing.primaryAxis && "primaryAxisSizingMode" in f) f.primaryAxisSizingMode = s.sizing.primaryAxis;
+    if (s.sizing.counterAxis && "counterAxisSizingMode" in f) f.counterAxisSizingMode = s.sizing.counterAxis;
+  }
+  if (s.align) {
+    if (s.align.primary && "primaryAxisAlignItems" in f) f.primaryAxisAlignItems = s.align.primary;
+    if (s.align.counter && "counterAxisAlignItems" in f) f.counterAxisAlignItems = s.align.counter;
+  }
+}
+
 // src/main.ts
-figma.showUI(__html__, { width: 820, height: 520 });
+figma.showUI(__html__, { width: 980, height: 620 });
 figma.ui.onmessage = async (msg) => {
+  var _a, _b, _c;
   try {
-    if (msg.type === "sync-tokens") {
-      figma.notify("\u2705 Tokens synced");
-      figma.ui.postMessage({ type: "notify", text: "Tokens synced" });
-      return;
-    }
-    if (msg.type === "generate-screens") {
-      figma.notify("\u{1F9F1} Screens generated");
-      figma.ui.postMessage({ type: "notify", text: "Screens generated" });
-      return;
-    }
-    if (msg.type === "update-screens") {
-      figma.notify("\u267B\uFE0F Screens updated");
-      figma.ui.postMessage({ type: "notify", text: "Screens updated" });
-      return;
-    }
-    if (msg.type === "export-variables") {
-      const data = exportVariablesJSON();
-      figma.ui.postMessage({ type: "export-result", payload: data });
-      figma.notify("\u{1F4E4} Variables exported");
-      return;
-    }
-    if (msg.type === "export-selection") {
-      const data = exportSelectionJSON({ onlyFrames: true, maxDepth: 3 });
-      figma.ui.postMessage({ type: "export-result", payload: data });
-      figma.notify("\u{1F4E4} Selection exported");
-      return;
-    }
-    if (msg.type === "export-document") {
-      const data = exportDocumentJSON({ onlyFrames: true, maxDepth: 2, maxChildren: 300 });
-      figma.ui.postMessage({ type: "export-result", payload: data });
-      figma.notify("\u{1F4E4} Document exported");
-      return;
+    switch (msg.type) {
+      case "sync-tokens":
+        figma.notify("\u2705 Tokens synced");
+        figma.ui.postMessage({ type: "notify", text: "Tokens synced" });
+        return;
+      case "export-variables": {
+        const data = exportVariablesJSON();
+        figma.ui.postMessage({ type: "export-result", payload: data });
+        figma.notify("\u{1F4E4} Variables exported");
+        return;
+      }
+      case "export-selection": {
+        const data = exportSelectionJSON({ onlyFrames: true, maxDepth: 4 });
+        figma.ui.postMessage({ type: "export-result", payload: data });
+        figma.notify("\u{1F4E4} Selection exported");
+        return;
+      }
+      case "export-document": {
+        const data = exportDocumentJSON({ onlyFrames: true, maxDepth: 3, maxChildren: 500 });
+        figma.ui.postMessage({ type: "export-result", payload: data });
+        figma.notify("\u{1F4E4} Document exported");
+        return;
+      }
+      case "normalize-spacing": {
+        normalizeSpacingInSelection((_a = msg.padding) != null ? _a : 24, (_b = msg.itemSpacing) != null ? _b : 12, (_c = msg.layout) != null ? _c : "VERTICAL");
+        return;
+      }
+      case "apply-rules": {
+        const rules = msg.rules || [];
+        applyRulesToPage(rules);
+        return;
+      }
+      case "fetch-and-apply-rules": {
+        const { serverUrl, token } = msg;
+        const res = await fetch(`${serverUrl.replace(/\/$/, "")}/rules`, {
+          headers: { Authorization: token ? `Bearer ${token}` : "" }
+        });
+        if (!res.ok) throw new Error(`Failed to GET /rules (${res.status})`);
+        const rules = await res.json();
+        applyRulesToPage(rules);
+        return;
+      }
+      default:
+        return;
     }
   } catch (e) {
     figma.notify(`\u26A0\uFE0F ${(e == null ? void 0 : e.message) || e}`);

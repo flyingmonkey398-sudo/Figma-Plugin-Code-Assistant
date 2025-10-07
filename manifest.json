@@ -4,5 +4,14 @@
   "api": "1.0.0",
   "editorType": ["figma"],
   "main": "dist/code.js",
-  "ui": "dist/ui.html"
+  "ui": "dist/ui.html",
+  "networkAccess": {
+    "allowedDomains": [
+      "https://your-server.example.com"
+    ],
+    "devAllowedDomains": [
+      "http://localhost:3000/"
+    ],
+    "reasoning": "Plugin fetches rules/changesets from our webhook server."
+  }
 }
