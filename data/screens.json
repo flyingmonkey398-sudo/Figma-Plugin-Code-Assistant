@@ -1,0 +1,13 @@
+{
+  "name": "Design Scanner + LLM",
+  "id": "com.yourname.designscanner",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/ui.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["none"],
+    "devAllowedDomains": ["http://localhost:8787"],
+    "reasoning": "Use a local CORS proxy during development to reach a local LLM (LM Studio)."
+  }
+}

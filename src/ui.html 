@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>DesignOps Assistant</title>
+    <style>
+      body { font: 12px/1.4 ui-sans-serif, system-ui; margin: 12px; }
+      .bar { display: grid; grid-template-columns: repeat(6,auto) 1fr; gap: 8px; align-items: center; }
+      .bar button { padding: 6px 10px; }
+      textarea { width: 100%; height: 220px; font-family: ui-monospace, monospace; }
+      .status { color:#666; text-align:right; }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      <button id="syncTokens">Sync Tokens</button>
+      <button id="genScreens">Generate Screens</button>
+      <button id="updateScreens">Update Screens</button>
+      <button id="exportVars">Export Variables</button>
+      <button id="exportSelection">Export Selection</button>
+      <button id="exportDoc">Export Document</button>
+      <span class="status" id="status">Ready</span>
+    </div>
+
+    <details open>
+      <summary>Output</summary>
+      <textarea id="out" spellcheck="false"></textarea>
+    </details>
+
+    <!-- Load the compiled UI logic -->
+    <script src="../dist/ui.js"></script>
+  </body>
+</html>
