@@ -1,63 +1,62 @@
-import { exportVariablesJSON, exportSelectionJSON, exportDocumentJSON } from "./core/export";
-import { normalizeSpacingInSelection, applyRulesToPage, type Rule } from "./actions";
+// src/main.ts
+import { exportTokenSchemaFromCollection } from "./core/export";
 
 figma.showUI(__html__, { width: 980, height: 620 });
 
+figma.notify("Plugin booted");
+
+
+/** Mirror logs into the UI panel and also to the code console. */
+function debug(...args: any[]) {
+    try {
+        figma.ui.postMessage({
+            type: "debug",
+            lines: args.map(a => {
+                if (typeof a === "string") return a;
+                try { return JSON.stringify(a); } catch (_e) { return String(a); }
+            }),
+            ts: Date.now(),
+        });
+    } catch (_e) {}
+    try { console.log(...args); } catch (_e) {}
+}
+
+debug("🔌 plugin booted");
+figma.ui.postMessage({ type: "ready" });
+
 figma.ui.onmessage = async (msg: any) => {
     try {
+        debug("[code] got", msg?.type);
+
         switch (msg.type) {
-            case "sync-tokens":
-                figma.notify("✅ Tokens synced");
-                figma.ui.postMessage({ type: "notify", text: "Tokens synced" });
-                return;
+            case "ping": {
+                figma.ui.postMessage({ type: "pong" });
+                figma.ui.postMessage({ type: "echo", text: "hello-from-code" });
 
-            case "export-variables": {
-                const data = exportVariablesJSON();
-                figma.ui.postMessage({ type: "export-result", payload: data });
-                figma.notify("📤 Variables exported");
+                const json = exportTokenSchemaFromCollection("YY_web");
+                figma.ui.postMessage({ type: "variables:pulled", json });
+                debug("[code] sent variables:pulled (bootstrap)");
                 return;
             }
 
-            case "export-selection": {
-                const data = exportSelectionJSON({ onlyFrames: true, maxDepth: 4 });
-                figma.ui.postMessage({ type: "export-result", payload: data });
-                figma.notify("📤 Selection exported");
+            case "pull-variables": {
+                const data = exportTokenSchemaFromCollection(msg.collection || "YY_web");
+                figma.ui.postMessage({ type: "variables:pulled", json: data });
+                figma.notify("📥 Variables pulled");
+                debug("[code] pulled", { count: Object.keys(data?.tokens ?? {}).length });
                 return;
             }
 
-            case "export-document": {
-                const data = exportDocumentJSON({ onlyFrames: true, maxDepth: 3, maxChildren: 500 });
-                figma.ui.postMessage({ type: "export-result", payload: data });
-                figma.notify("📤 Document exported");
+            case "resize-ui": {
+                const w = Math.max(240, Math.min(1600, Number(msg.width) || 980));
+                const h = Math.max(200, Math.min(1200, Number(msg.height) || 620));
+                figma.ui.resize(w, h);
+                debug("[code] resized UI →", `${w}×${h}`);
                 return;
             }
-
-            case "normalize-spacing": {
-                normalizeSpacingInSelection(msg.padding ?? 24, msg.itemSpacing ?? 12, msg.layout ?? "VERTICAL");
-                return;
-            }
-
-            case "apply-rules": {
-                const rules: Rule[] = msg.rules || [];
-                applyRulesToPage(rules);
-                return;
-            }
-
-            case "fetch-and-apply-rules": {
-                const { serverUrl, token } = msg;
-                const res = await fetch(`${serverUrl.replace(/\/$/, "")}/rules`, {
-                    headers: { Authorization: token ? `Bearer ${token}` : "" },
-                });
-                if (!res.ok) throw new Error(`Failed to GET /rules (${res.status})`);
-                const rules: Rule[] = await res.json();
-                applyRulesToPage(rules);
-                return;
-            }
-
-            default:
-                return;
         }
     } catch (e: any) {
+        debug("[code] error", e?.message || e);
         figma.notify(`⚠️ ${e?.message || e}`);
         figma.ui.postMessage({ type: "notify", text: `Error: ${e?.message || e}` });
     }

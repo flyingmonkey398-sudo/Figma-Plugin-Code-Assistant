@@ -1,8 +1,15 @@
 {
+  "name": "figma-design-scanner",
+  "private": true,
+  "version": "0.1.0",
   "scripts": {
-    "build": "esbuild src/main.ts --bundle --outfile=dist/code.js --platform=node --format=cjs --target=es2019 --loader:.json=json && esbuild src/ui.ts --bundle --outfile=dist/ui.js --platform=browser --target=es2019 && node -e \"const fs=require('fs');fs.mkdirSync('dist',{recursive:true});fs.copyFileSync('src/ui.html','dist/ui.html');\"",
-    "watch": "npm run build -- --watch",
-    "typecheck": "tsc --noEmit",
-    "server": "node server/index.mjs"
+    "build": "esbuild src/main.ts --bundle --outfile=dist/code.js --platform=node --format=cjs --target=es2018 --loader:.json=json --sourcemap --sources-content=true && esbuild src/ui.ts --bundle --outfile=dist/ui.js --platform=browser --target=es2018 --sourcemap --sources-content=true && node -e \"const fs=require('fs');fs.mkdirSync('dist',{recursive:true});fs.copyFileSync('src/ui.html','dist/ui.html');console.log('copied src/ui.html → dist/ui.html');\"",
+  "watch": "npm run build -- --watch",
+  "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.88.0",
+    "esbuild": "^0.21.5",
+    "typescript": "^5.5.4"
   }
 }

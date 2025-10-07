@@ -2,64 +2,39 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>DesignOps Assistant</title>
+    <title>DesignOps Assistant (Dev)</title>
     <style>
-        body { font: 12px/1.4 ui-sans-serif, system-ui; margin: 12px; }
-        .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-        .bar input[type="number"]{ width:72px; }
-        textarea { width: 100%; height: 220px; font-family: ui-monospace, monospace; }
-        .status { color:#666; text-align:right; }
-        #tree { font-family: ui-monospace, monospace; font-size:11px; line-height:1.35; max-height:280px; overflow:auto; border:1px solid #e5e5e5; padding:8px; border-radius:6px; }
-        details > summary { cursor:pointer; }
-        .muted{ color:#777 }
-        .pill{ background:#f3f3f3; border-radius:999px; padding:0 6px; margin-left:4px; }
+        * { box-sizing: border-box; }
+        body { margin: 10px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color:#111; }
+        .bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+        input[type="number"] { width: 90px; }
+        button { padding:6px 10px; border:1px solid #ccc; border-radius:6px; background:#f7f7f7; cursor:pointer; }
+        textarea { width:100%; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; padding:8px; border:1px solid #ccc; border-radius:6px; }
+        details > summary { cursor:pointer; font-weight:600; margin:6px 0; }
+        #out { height:40vh; }
+        #log { height:20vh; background:#0b0b0b; color:#d7d7d7; }
+        .status { margin-left: 6px; opacity: .75; }
     </style>
 </head>
 <body>
-<div class="grid">
-    <section>
-        <div class="bar">
-            <button id="exportSelection">Export Selection</button>
-            <button id="exportDoc">Export Document</button>
-            <span class="status" id="status">Ready</span>
-        </div>
+<section class="bar">
+    <button id="pullVars">Pull Variables</button>
+    <label>W <input id="w" type="number" value="980" /></label>
+    <label>H <input id="h" type="number" value="620" /></label>
+    <button id="resize">Resize UI</button>
+    <span class="status" id="status">Ready</span>
+</section>
 
+<details open>
+    <summary>Variables JSON (Light/Dark)</summary>
+    <textarea id="out" spellcheck="false"></textarea>
+</details>
 
-        <details open>
-            <summary>Raw JSON</summary>
-            <textarea id="out" spellcheck="false"></textarea>
-        </details>
-    </section>
+<details open>
+    <summary>Logs</summary>
+    <textarea id="log" spellcheck="false"></textarea>
+</details>
 
-
-    <section>
-        <div class="bar">
-            <label>Padding <input id="pad" type="number" value="24"/></label>
-            <label>Item <input id="gap" type="number" value="12"/></label>
-            <select id="layout">
-                <option>VERTICAL</option>
-                <option>HORIZONTAL</option>
-            </select>
-            <button id="normalize">Normalize Spacing</button>
-        </div>
-
-
-        <div class="bar" style="margin-top:6px">
-            <input id="server" placeholder="http://localhost:3000" style="flex:1"/>
-            <input id="token" placeholder="Bearer token (optional)"/>
-            <button id="pullApply">Pull & Apply Rules</button>
-        </div>
-
-
-        <details open style="margin-top:8px">
-            <summary>Node Visualizer</summary>
-            <div id="tree">Click “Export Selection/Document” to render the tree.</div>
-        </details>
-    </section>
-</div>
-
-
-<script src="ui.js"></script>
+<script src="./ui.js"></script>
 </body>
 </html>
