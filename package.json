@@ -3,13 +3,13 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "build": "esbuild src/main.ts --bundle --outfile=dist/code.js --platform=node --format=cjs --target=es2019 --loader:.json=json && esbuild src/ui.ts --bundle --outfile=dist/ui.js --platform=browser --target=es2019 && node -e \"require('fs').cpSync('./src/ui.html','dist/ui.html')\"",
-    "watch": "npm run build -- --watch",
-    "typecheck": "tsc --noEmit"
+  "build": "esbuild src/main.ts --bundle --outfile=dist/code.js --platform=node --format=cjs --target=es2019 --loader:.json=json && esbuild src/ui.ts --bundle --outfile=dist/ui.js --platform=browser --target=es2019 && node -e \"const fs=require('fs');fs.mkdirSync('dist',{recursive:true});fs.copyFileSync('src/ui.html','dist/ui.html');console.log('copied src/ui.html → dist/ui.html');\"",
+  "watch": "npm run build -- --watch",
+  "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@figma/plugin-typings": "^1.117.1",
+    "@figma/plugin-typings": "^1.88.0",
     "esbuild": "^0.21.5",
-    "typescript": "^5.9.3"
+    "typescript": "^5.5.4"
   }
 }

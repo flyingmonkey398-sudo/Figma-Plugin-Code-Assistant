@@ -27,7 +27,6 @@
       <textarea id="out" spellcheck="false"></textarea>
     </details>
 
-    <!-- Load the compiled UI logic -->
-    <script src="../dist/ui.js"></script>
+    <script src="./ui.js"></script>
   </body>
 </html>

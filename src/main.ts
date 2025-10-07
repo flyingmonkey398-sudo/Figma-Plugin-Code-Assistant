@@ -1,17 +1,26 @@
 import { exportVariablesJSON, exportSelectionJSON, exportDocumentJSON } from "./core/export";
-// existing imports: syncTokens, generateOrUpdateScreens, etc.
+
+figma.showUI(__html__, { width: 820, height: 520 });
 
 figma.ui.onmessage = async (msg: any) => {
     try {
         if (msg.type === "sync-tokens") {
-            // ... your existing sync (notify on success)
+            // TODO: call your existing sync
             figma.notify("✅ Tokens synced");
             figma.ui.postMessage({ type: "notify", text: "Tokens synced" });
             return;
         }
-        if (msg.type === "generate-screens" || msg.type === "update-screens") {
-            // ... your existing generate/update
-            figma.notify(msg.type === "generate-screens" ? "🧱 Screens generated" : "♻️ Screens updated");
+
+        if (msg.type === "generate-screens") {
+            // TODO: call your generate
+            figma.notify("🧱 Screens generated");
+            figma.ui.postMessage({ type: "notify", text: "Screens generated" });
+            return;
+        }
+
+        if (msg.type === "update-screens") {
+            // TODO: call your update
+            figma.notify("♻️ Screens updated");
             figma.ui.postMessage({ type: "notify", text: "Screens updated" });
             return;
         }
@@ -22,12 +31,14 @@ figma.ui.onmessage = async (msg: any) => {
             figma.notify("📤 Variables exported");
             return;
         }
+
         if (msg.type === "export-selection") {
             const data = exportSelectionJSON({ onlyFrames: true, maxDepth: 3 });
             figma.ui.postMessage({ type: "export-result", payload: data });
             figma.notify("📤 Selection exported");
             return;
         }
+
         if (msg.type === "export-document") {
             const data = exportDocumentJSON({ onlyFrames: true, maxDepth: 2, maxChildren: 300 });
             figma.ui.postMessage({ type: "export-result", payload: data });

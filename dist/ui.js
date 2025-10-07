@@ -3,9 +3,9 @@
   // src/ui.ts
   var send = (msg) => parent.postMessage({ pluginMessage: msg }, "*");
   var out = document.getElementById("out");
-  var status = document.getElementById("status");
+  var statusEl = document.getElementById("status");
   function setStatus(s) {
-    status.textContent = s;
+    statusEl.textContent = s;
   }
   document.getElementById("syncTokens").onclick = () => send({ type: "sync-tokens" });
   document.getElementById("genScreens").onclick = () => send({ type: "generate-screens" });
@@ -30,6 +30,6 @@
       out.value = JSON.stringify(msg.payload, null, 2);
       setStatus("Ready");
     }
-    if (msg.type === "notify") setStatus(msg.text);
+    if (msg.type === "notify") setStatus(msg.text || "Ready");
   };
 })();

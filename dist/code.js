@@ -167,6 +167,7 @@ function compact(o) {
 }
 
 // src/main.ts
+figma.showUI(__html__, { width: 820, height: 520 });
 figma.ui.onmessage = async (msg) => {
   try {
     if (msg.type === "sync-tokens") {
@@ -174,8 +175,13 @@ figma.ui.onmessage = async (msg) => {
       figma.ui.postMessage({ type: "notify", text: "Tokens synced" });
       return;
     }
-    if (msg.type === "generate-screens" || msg.type === "update-screens") {
-      figma.notify(msg.type === "generate-screens" ? "\u{1F9F1} Screens generated" : "\u267B\uFE0F Screens updated");
+    if (msg.type === "generate-screens") {
+      figma.notify("\u{1F9F1} Screens generated");
+      figma.ui.postMessage({ type: "notify", text: "Screens generated" });
+      return;
+    }
+    if (msg.type === "update-screens") {
+      figma.notify("\u267B\uFE0F Screens updated");
       figma.ui.postMessage({ type: "notify", text: "Screens updated" });
       return;
     }
