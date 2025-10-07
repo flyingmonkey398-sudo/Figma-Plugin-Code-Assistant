@@ -208,7 +208,7 @@ function matches(n, m) {
   if (m.nameRegex) {
     try {
       if (!new RegExp(m.nameRegex).test(n.name)) return false;
-    } catch {
+    } catch (e) {
       return false;
     }
   }

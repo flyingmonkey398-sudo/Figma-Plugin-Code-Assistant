@@ -56,7 +56,7 @@
       out.value = JSON.stringify(msg.payload, null, 2);
       try {
         renderTree(msg.payload);
-      } catch {
+      } catch (e2) {
       }
       setStatus("Ready");
     }

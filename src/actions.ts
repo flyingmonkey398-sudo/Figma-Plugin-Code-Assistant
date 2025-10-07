@@ -60,7 +60,7 @@ function matches(n: SceneNode, m?: Rule["match"]) {
     if (m.nameRegex) {
         try {
             if (!new RegExp(m.nameRegex).test(n.name)) return false;
-        } catch {
+        } catch (e) {
             return false;
         }
     }

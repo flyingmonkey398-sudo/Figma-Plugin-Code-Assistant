@@ -51,7 +51,7 @@ window.onmessage = (e) => {
     if (!msg) return;
     if (msg.type === "export-result") {
         out.value = JSON.stringify(msg.payload, null, 2);
-        try { renderTree(msg.payload); } catch {}
+        try { renderTree(msg.payload); } catch (e) {}
         setStatus("Ready");
     }
     if (msg.type === "notify") setStatus(msg.text || "Ready");
